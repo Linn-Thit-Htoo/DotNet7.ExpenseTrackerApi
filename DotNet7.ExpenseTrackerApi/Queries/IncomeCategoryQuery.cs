@@ -2,6 +2,8 @@
 
 public static class IncomeCategoryQuery
 {
+    #region GetIncomeCategoryListQuery
+
     public static string GetIncomeCategoryListQuery()
     {
         return @"SELECT [IncomeCategoryId]
@@ -10,11 +12,19 @@ public static class IncomeCategoryQuery
   FROM [dbo].[Income_Category] WHERE IsActive = @IsActive ORDER BY IncomeCategoryId DESC";
     }
 
+    #endregion
+
+    #region CreateIncomeCategoryQuery
+
     public static string CreateIncomeCategoryQuery()
     {
         return @"INSERT INTO Income_Category (IncomeCategoryName, IsActive)
 VALUES (@IncomeCategoryName, @IsActive)";
     }
+
+    #endregion
+
+    #region CheckCreateIncomeCategoryDuplicateQuery
 
     public static string CheckCreateIncomeCategoryDuplicateQuery()
     {
@@ -23,6 +33,10 @@ VALUES (@IncomeCategoryName, @IsActive)";
       ,[IsActive]
   FROM [dbo].[Income_Category] WHERE IncomeCategoryName = @IncomeCategoryName AND IsActive = @IsActive";
     }
+
+    #endregion
+
+    #region CheckIncomeCategoryDuplicateQuery
 
     public static string CheckIncomeCategoryDuplicateQuery()
     {
@@ -33,11 +47,19 @@ VALUES (@IncomeCategoryName, @IsActive)";
           IsActive = @IsActive AND IncomeCategoryId != @IncomeCategoryId";
     }
 
+    #endregion
+
+    #region UpdateIncomeCategoryQuery
+
     public static string UpdateIncomeCategoryQuery()
     {
         return @"UPDATE Income_Category SET IncomeCategoryName = @IncomeCategoryName 
 WHERE IncomeCategoryId = @IncomeCategoryId";
     }
+
+    #endregion
+
+    #region CheckIncomeCategoryExistsQuery
 
     public static string CheckIncomeCategoryExistsQuery()
     {
@@ -48,8 +70,14 @@ WHERE IncomeCategoryId = @IncomeCategoryId";
   FROM [dbo].[Income] WHERE IncomeCategoryId = @IncomeCategoryId";
     }
 
+    #endregion
+
+    #region DeleteIncomeCategoryQuery
+
     public static string DeleteIncomeCategoryQuery()
     {
         return @"UPDATE Income_Category SET IsActive = @IsActive WHERE IncomeCategoryId = @IncomeCategoryId";
     }
+
+    #endregion
 }

@@ -2,6 +2,8 @@
 
 public static class ExpenseQuery
 {
+    #region GetExpenseListQuery
+
     public static string GetExpenseListQuery()
     {
         return @"SELECT ExpenseId, Expense_Category.ExpenseCategoryName, Users.UserName, Amount, Expense.IsActive,
@@ -12,6 +14,10 @@ INNER JOIN Users ON Expense.UserId = Users.UserId
 WHERE Expense.IsActive = @IsActive
 ORDER BY ExpenseId DESC";
     }
+
+    #endregion
+
+    #region GetExpenseListByUserIdQuery
 
     public static string GetExpenseListByUserIdQuery()
     {
@@ -24,11 +30,19 @@ WHERE Expense.IsActive = @IsActive AND Expense.UserId = @UserId
 ORDER BY ExpenseId DESC";
     }
 
+    #endregion
+
+    #region CreateExpenseQuery
+
     public static string CreateExpenseQuery()
     {
         return @"INSERT INTO Expense (ExpenseCategoryId, UserId, Amount, CreateDate, IsActive)
 VALUES (@ExpenseCategoryId, @UserId, @Amount, @CreateDate, @IsActive)";
     }
+
+    #endregion
+
+    #region UpdateExpenseQuery
 
     public static string UpdateExpenseQuery()
     {
@@ -36,8 +50,14 @@ VALUES (@ExpenseCategoryId, @UserId, @Amount, @CreateDate, @IsActive)";
 Amount = @Amount WHERE ExpenseId = @ExpenseId AND UserId = @UserId";
     }
 
+    #endregion
+
+    #region DeleteExpenseQuery
+
     public static string DeleteExpenseQuery()
     {
         return @"UPDATE Expense SET IsActive = @IsActive WHERE ExpenseId = @ExpenseId";
     }
+
+    #endregion
 }

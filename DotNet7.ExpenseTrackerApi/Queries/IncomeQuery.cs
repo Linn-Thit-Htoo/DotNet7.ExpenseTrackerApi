@@ -2,6 +2,8 @@
 
 public static class IncomeQuery
 {
+    #region GetIncomeListQuery
+
     public static string GetIncomeListQuery()
     {
         return @"SELECT Income.IncomeId, Income.CreateDate, Users.UserName, Income_Category.IncomeCategoryName,
@@ -12,6 +14,10 @@ INNER JOIN Income_Category ON Income.IncomeCategoryId = Income_Category.IncomeCa
 WHERE Income.IsActive = @IsActive
 ORDER BY IncomeId DESC"; ;
     }
+
+    #endregion
+
+    #region GetIncomeListByUserIdQuery
 
     public static string GetIncomeListByUserIdQuery()
     {
@@ -24,11 +30,19 @@ WHERE Income.IsActive = @IsActive AND Income.UserId = @UserId
 ORDER BY IncomeId DESC";
     }
 
+    #endregion
+
+    #region CreateIncomeQuery
+
     public static string CreateIncomeQuery()
     {
         return @"INSERT INTO Income (IncomeCategoryId, UserId, Amount, CreateDate, IsActive)
 VALUES (@IncomeCategoryId, @UserId, @Amount, @CreateDate, @IsActive)";
     }
+
+    #endregion
+
+    #region UpdateIncomeQuery
 
     public static string UpdateIncomeQuery()
     {
@@ -36,8 +50,14 @@ VALUES (@IncomeCategoryId, @UserId, @Amount, @CreateDate, @IsActive)";
 Amount = @Amount WHERE IncomeId = @IncomeId AND UserId = @UserId";
     }
 
+    #endregion
+
+    #region DeleteIncomeQuery
+
     public static string DeleteIncomeQuery()
     {
         return @"UPDATE Income SET IsActive = @IsActive WHERE IncomeId = @IncomeId";
     }
+
+    #endregion
 }
