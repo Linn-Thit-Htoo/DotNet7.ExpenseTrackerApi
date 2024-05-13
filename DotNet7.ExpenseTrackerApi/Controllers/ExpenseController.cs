@@ -380,10 +380,14 @@ WHERE ExpenseId = @ExpenseId";
                 #region Update Balance
 
                 string updateBalanceQuery = @"UPDATE Balance SET Amount = @Amount WHERE UserId = @UserId";
-                SqlParameter[] updateBalanceParams = { new("@UserId", requestModel.UserId) };
+                List<SqlParameter> updateBalanceParams = new()
+                {
+                    new("@UserId", requestModel.UserId),
+                    new("@Amount", totalAmount)
+                };
 
                 updateBalanceResult = _service.
-                   Execute(conn, transaction, updateBalanceQuery, updateBalanceParams);
+                   Execute(conn, transaction, updateBalanceQuery, updateBalanceParams.ToArray());
                 if (updateBalanceResult <= 0)
                 {
                     transaction.Rollback();
