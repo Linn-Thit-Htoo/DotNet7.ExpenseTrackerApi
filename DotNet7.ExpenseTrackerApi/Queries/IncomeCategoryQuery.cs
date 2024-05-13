@@ -59,19 +59,6 @@ WHERE IncomeCategoryId = @IncomeCategoryId";
 
     #endregion
 
-    #region CheckIncomeCategoryExistsQuery
-
-    public static string CheckIncomeCategoryExistsQuery()
-    {
-        return @"SELECT [IncomeId]
-      ,[IncomeCategoryId]
-      ,[Amount]
-      ,[IsActive]
-  FROM [dbo].[Income] WHERE IncomeCategoryId = @IncomeCategoryId";
-    }
-
-    #endregion
-
     #region DeleteIncomeCategoryQuery
 
     public static string DeleteIncomeCategoryQuery()
@@ -80,4 +67,10 @@ WHERE IncomeCategoryId = @IncomeCategoryId";
     }
 
     #endregion
+
+    public static string CheckIncomeCategoryActiveQuery()
+    {
+        return @"SELECT IncomeCategoryId, IncomeCategoryName, IsActive
+FROM Income_Category WHERE IncomeCategoryId = @IncomeCategoryId AND IsActive = @IsActive";
+    }
 }

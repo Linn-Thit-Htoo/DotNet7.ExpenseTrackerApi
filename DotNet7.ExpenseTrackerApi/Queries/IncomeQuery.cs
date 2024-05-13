@@ -60,4 +60,13 @@ Amount = @Amount WHERE IncomeId = @IncomeId AND UserId = @UserId";
     }
 
     #endregion
+
+    public static string GetCheckIncomeExistsQuery()
+    {
+        return @"SELECT [IncomeId]
+      ,[IncomeCategoryId]
+      ,[Amount]
+      ,[IsActive]
+  FROM [dbo].[Income] WHERE IncomeCategoryId = @IncomeCategoryId";
+    }
 }

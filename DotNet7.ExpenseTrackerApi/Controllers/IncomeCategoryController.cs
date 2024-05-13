@@ -73,41 +73,41 @@ public class IncomeCategoryController : ControllerBase
         }
     }
 
-    [HttpPut]
-    [Route("/api/income-category/{id}")]
-    public IActionResult UpdateIncomeCategory([FromBody] IncomeCategoryRequestModel requestModel, long id)
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(requestModel.IncomeCategoryName))
-                return BadRequest("Category name cannot be empty.");
+    //[HttpPut]
+    //[Route("/api/income-category/{id}")]
+    //public IActionResult UpdateIncomeCategory([FromBody] IncomeCategoryRequestModel requestModel, long id)
+    //{
+    //    try
+    //    {
+    //        if (string.IsNullOrEmpty(requestModel.IncomeCategoryName))
+    //            return BadRequest("Category name cannot be empty.");
 
-            string duplicateQuery = IncomeCategoryQuery.CheckIncomeCategoryDuplicateQuery();
-            List<SqlParameter> duplicateParams = new()
-            {
-                new SqlParameter("@IncomeCategoryName", requestModel.IncomeCategoryName),
-                new SqlParameter("@IsActive", true),
-                new SqlParameter("@IncomeCategoryId", id)
-            };
-            DataTable dt = _service.QueryFirstOrDefault(duplicateQuery, duplicateParams.ToArray());
-            if (dt.Rows.Count > 0)
-                return Conflict("Income Category Name already exists.");
+    //        string duplicateQuery = IncomeCategoryQuery.CheckIncomeCategoryDuplicateQuery();
+    //        List<SqlParameter> duplicateParams = new()
+    //        {
+    //            new SqlParameter("@IncomeCategoryName", requestModel.IncomeCategoryName),
+    //            new SqlParameter("@IsActive", true),
+    //            new SqlParameter("@IncomeCategoryId", id)
+    //        };
+    //        DataTable dt = _service.QueryFirstOrDefault(duplicateQuery, duplicateParams.ToArray());
+    //        if (dt.Rows.Count > 0)
+    //            return Conflict("Income Category Name already exists.");
 
-            string query = IncomeCategoryQuery.UpdateIncomeCategoryQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@IncomeCategoryName", requestModel.IncomeCategoryName),
-                new SqlParameter("@IncomeCategoryId", id)
-            };
-            int result = _service.Execute(query, parameters.ToArray());
+    //        string query = IncomeCategoryQuery.UpdateIncomeCategoryQuery();
+    //        List<SqlParameter> parameters = new()
+    //        {
+    //            new SqlParameter("@IncomeCategoryName", requestModel.IncomeCategoryName),
+    //            new SqlParameter("@IncomeCategoryId", id)
+    //        };
+    //        int result = _service.Execute(query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(202, "Updating Successful!") : BadRequest("Updating Fail!");
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
+    //        return result > 0 ? StatusCode(202, "Updating Successful!") : BadRequest("Updating Fail!");
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new Exception(ex.Message);
+    //    }
+    //}
 
     // delete
     [HttpDelete]
@@ -119,7 +119,7 @@ public class IncomeCategoryController : ControllerBase
             if (id == 0)
                 return BadRequest();
 
-            string validateQuery = IncomeCategoryQuery.CheckIncomeCategoryExistsQuery();
+            string validateQuery = IncomeQuery.GetCheckIncomeExistsQuery();
             SqlParameter[] validateParams = { new("@IncomeCategoryId", id) };
             DataTable dt = _service.QueryFirstOrDefault(validateQuery, validateParams);
 

@@ -75,41 +75,41 @@ public class ExpenseCategoryController : ControllerBase
         }
     }
 
-    [HttpPut]
-    [Route("/api/expense-category/{id}")]
-    public IActionResult UpdateExpenseCategory([FromBody] ExpenseCategoryRequestModel requestModel, long id)
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(requestModel.ExpenseCategoryName))
-                return BadRequest("Category name cannot be empty.");
+    //[HttpPut]
+    //[Route("/api/expense-category/{id}")]
+    //public IActionResult UpdateExpenseCategory([FromBody] ExpenseCategoryRequestModel requestModel, long id)
+    //{
+    //    try
+    //    {
+    //        if (string.IsNullOrEmpty(requestModel.ExpenseCategoryName))
+    //            return BadRequest("Category name cannot be empty.");
 
-            string duplicateQuery = ExpenseCategoryQuery.CheckUpdateExpenseCategoryDuplicateQuery();
-            List<SqlParameter> duplicateParams = new()
-            {
-                new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
-                new SqlParameter("@IsActive", true),
-                new SqlParameter("@ExpenseCategoryId", id)
-            };
-            DataTable dt = _service.QueryFirstOrDefault(duplicateQuery, duplicateParams.ToArray());
-            if (dt.Rows.Count > 0)
-                return Conflict("Expense Category Name already exists.");
+    //        string duplicateQuery = ExpenseCategoryQuery.CheckUpdateExpenseCategoryDuplicateQuery();
+    //        List<SqlParameter> duplicateParams = new()
+    //        {
+    //            new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
+    //            new SqlParameter("@IsActive", true),
+    //            new SqlParameter("@ExpenseCategoryId", id)
+    //        };
+    //        DataTable dt = _service.QueryFirstOrDefault(duplicateQuery, duplicateParams.ToArray());
+    //        if (dt.Rows.Count > 0)
+    //            return Conflict("Expense Category Name already exists.");
 
-            string query = ExpenseCategoryQuery.UpdateExpenseCategoryQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
-                new SqlParameter("@ExpenseCategoryId", id)
-            };
-            int result = _service.Execute(query, parameters.ToArray());
+    //        string query = ExpenseCategoryQuery.UpdateExpenseCategoryQuery();
+    //        List<SqlParameter> parameters = new()
+    //        {
+    //            new SqlParameter("@ExpenseCategoryName", requestModel.ExpenseCategoryName),
+    //            new SqlParameter("@ExpenseCategoryId", id)
+    //        };
+    //        int result = _service.Execute(query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(202, "Updating Successful!") : BadRequest("Updating Fail!");
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
+    //        return result > 0 ? StatusCode(202, "Updating Successful!") : BadRequest("Updating Fail!");
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new Exception(ex.Message);
+    //    }
+    //}
 
     // delete
     [HttpDelete]

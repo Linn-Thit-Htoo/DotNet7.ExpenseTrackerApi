@@ -81,8 +81,9 @@ public class IncomeController : ControllerBase
             if (string.IsNullOrEmpty(requestModel.CreateDate))
                 return BadRequest();
 
-            string checkIncomeCategoryActiveQuery = @"SELECT IncomeCategoryId, IncomeCategoryName, IsActive
-FROM Income_Category WHERE IncomeCategoryId = @IncomeCategoryId AND IsActive = @IsActive";
+            #region Check Income Category is valid
+
+            string checkIncomeCategoryActiveQuery = IncomeCategoryQuery.CheckIncomeCategoryActiveQuery();
             List<SqlParameter> checkIncomeCategoryActiveParams = new()
             {
                 new SqlParameter("@IncomeCategoryId", requestModel.IncomeCategoryId),
@@ -91,6 +92,8 @@ FROM Income_Category WHERE IncomeCategoryId = @IncomeCategoryId AND IsActive = @
             DataTable incomeCategory = _adoDotNetService.QueryFirstOrDefault(checkIncomeCategoryActiveQuery, checkIncomeCategoryActiveParams.ToArray());
             if (incomeCategory.Rows.Count == 0)
                 return NotFound("Income Category Not Found or Inactive");
+
+            #endregion
 
             string query = IncomeQuery.CreateIncomeQuery();
             List<SqlParameter> parameters = new()
@@ -119,6 +122,20 @@ FROM Income_Category WHERE IncomeCategoryId = @IncomeCategoryId AND IsActive = @
         {
             if (requestModel.IncomeCategoryId <= 0 || requestModel.Amount <= 0 || id <= 0 || requestModel.UserId <= 0)
                 return BadRequest();
+
+            #region Check Income Category is valid
+
+            string checkIncomeCategoryActiveQuery = IncomeCategoryQuery.CheckIncomeCategoryActiveQuery();
+            List<SqlParameter> checkIncomeCategoryActiveParams = new()
+            {
+                new SqlParameter("@IncomeCategoryId", requestModel.IncomeCategoryId),
+                new SqlParameter("@IsActive", true)
+            };
+            DataTable incomeCategory = _adoDotNetService.QueryFirstOrDefault(checkIncomeCategoryActiveQuery, checkIncomeCategoryActiveParams.ToArray());
+            if (incomeCategory.Rows.Count == 0)
+                return NotFound("Income Category Not Found or Inactive");
+
+            #endregion
 
             string query = IncomeQuery.UpdateIncomeQuery();
             List<SqlParameter> parameters = new()

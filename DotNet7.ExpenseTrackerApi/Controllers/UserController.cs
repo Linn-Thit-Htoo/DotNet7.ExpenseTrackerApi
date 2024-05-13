@@ -92,7 +92,7 @@ public class UserController : ControllerBase
                 List<SqlParameter> balanceParams = new()
                 {
                     new SqlParameter("@UserId", userID),
-                    new SqlParameter("@Amount", "0"),
+                    new SqlParameter("@Amount", 0),
                     new SqlParameter("@CreateDate", DateTime.Now)
                 };
                 SqlCommand balanceCmd = new(balanceQuery, conn)
