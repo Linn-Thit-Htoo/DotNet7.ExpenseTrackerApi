@@ -75,6 +75,8 @@ public class IncomeController : ControllerBase
 
         try
         {
+            #region Validation
+
             if (requestModel.IncomeCategoryId <= 0)
                 return BadRequest();
 
@@ -86,6 +88,8 @@ public class IncomeController : ControllerBase
 
             if (string.IsNullOrEmpty(requestModel.CreateDate))
                 return BadRequest();
+
+            #endregion
 
             #region Check Income Category is valid
 
@@ -138,17 +142,107 @@ public class IncomeController : ControllerBase
 
             #region Update Balance
 
-            string updateBalanceAmountQuery = @"UPDATE Balance SET Amount = @Amount WHERE UserId = @UserId";
-            List<SqlParameter> updateBalanceAmountParams = new()
-            {
-                new SqlParameter("@Amount", updatedMoney),
-                new SqlParameter("@UserId", requestModel.UserId)
-            };
-            int updateBalanceResult = _adoDotNetService.Execute(conn, transaction, updateBalanceAmountQuery, updateBalanceAmountParams.ToArray());
+            // ဝင်ငွေ ပမာဏ က လိုအပ်ငွေထက် နဲရင်နဲမယ် များရင်များမယ် တူရင် တူမယ်
+
+            #region Get Old Needed Amount Query
+
+            string getOldNeededAmountQuery = @"SELECT TOP (1000) [BalanceId]
+      ,[UserId]
+      ,[Amount]
+      ,[NeededAmount]
+      ,[CreateDate]
+      ,[UpdateDate]
+  FROM [ExpenseTracker].[dbo].[Balance] WHERE UserId = @UserId";
+            SqlParameter[] getOldNeededAmountParams = { new("@UserId", requestModel.UserId) };
+            DataTable oldBalanceDt = _adoDotNetService
+                .QueryFirstOrDefault(conn, transaction, getOldNeededAmountQuery, getOldNeededAmountParams);
 
             #endregion
 
-            if (result > 0 && updateBalanceResult > 0)
+            long oldNeededAmount = Convert.ToInt64(oldBalanceDt.Rows[0]["NeededAmount"]);
+            long oldBalanceAmount = Convert.ToInt64(oldBalanceDt.Rows[0]["Amount"]);
+
+            int balanceUpdateResult = 0;
+            int neededAmountUpdateResult = 0;
+            int resetAmountResult = 0;
+
+            #region ဝင်ငွေပမာဏက လိုအပ်ငွေထက် များနေခဲ့ရင်
+
+            if (requestModel.Amount > oldNeededAmount)
+            {
+                long totalBalance = requestModel.Amount - oldNeededAmount + oldBalanceAmount;
+                string updateBalanceQuery = @"UPDATE Balance SET Amount = @Amount, NeededAmount = @NeededAmount
+WHERE UserId = @UserId";
+                List<SqlParameter> updateBalanceParams = new()
+                {
+                    new SqlParameter("@Amount", totalBalance),
+                    new SqlParameter("@NeededAmount", Convert.ToInt64(0)),
+                    new SqlParameter("@UserId", requestModel.UserId)
+                };
+                balanceUpdateResult = _adoDotNetService
+                    .Execute(conn, transaction, updateBalanceQuery, updateBalanceParams.ToArray());
+
+                if (balanceUpdateResult <= 0)
+                {
+                    transaction.Rollback();
+                    return BadRequest("Updating Fail.");
+                }
+            }
+
+            #endregion
+
+            #region ဝင်ငွေပမာဏက လိုအပ်ငွေထက် နဲနေခဲ့ရင်
+
+            else if (requestModel.Amount < oldNeededAmount)
+            {
+                long totalAmount = oldNeededAmount - requestModel.Amount;
+                string neededAmountUpdateQuery = @"UPDATE Balance SET Amount = @Amount, NeededAmount = @NeededAmount
+WHERE UserId = @UserId";
+                List<SqlParameter> neededAmountUpdateParams = new()
+                {
+                    new SqlParameter("@Amount", Convert.ToInt64(0)),
+                    new SqlParameter("@NeededAmount", totalAmount),
+                    new SqlParameter("@UserId", requestModel.UserId)
+                };
+                neededAmountUpdateResult = _adoDotNetService
+                    .Execute(conn, transaction, neededAmountUpdateQuery, neededAmountUpdateParams.ToArray());
+
+                if (neededAmountUpdateResult <= 0)
+                {
+                    transaction.Rollback();
+                    return BadRequest("Updating Fail.");
+                }
+            }
+
+            #endregion
+
+            #region ဝင်ငွေပမာဏနဲ့ လိုအပ်ငွေ နဲ့ တူနေခဲ့ရင် (အကြွေးကျေတဲ့case)
+
+            else if (requestModel.Amount == oldNeededAmount)
+            {
+                string resetAmountQuery = @"UPDATE Balance SET Amount = @Amount, NeededAmount = @NeededAmount
+WHERE UserId = @UserId";
+                List<SqlParameter> resetAmountParams = new()
+                {
+                    new SqlParameter("@Amount", Convert.ToInt64(0)),
+                    new SqlParameter("@NeededAmount", Convert.ToInt64(0)),
+                    new SqlParameter("@UserId", requestModel.UserId)
+                };
+                resetAmountResult = _adoDotNetService
+                    .Execute(conn, transaction, resetAmountQuery, resetAmountParams.ToArray());
+
+                if (resetAmountResult <= 0)
+                {
+                    transaction.Rollback();
+                    return BadRequest("Updating Fail.");
+                }
+            }
+
+            #endregion
+
+            #endregion
+
+            if (result > 0 && (balanceUpdateResult > 0 || neededAmountUpdateResult > 0 || resetAmountResult > 0))
             {
                 transaction.Commit();
                 return StatusCode(201, "Income Created!");
