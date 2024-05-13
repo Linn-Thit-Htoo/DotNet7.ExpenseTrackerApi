@@ -68,9 +68,13 @@ WHERE IncomeCategoryId = @IncomeCategoryId";
 
     #endregion
 
+    #region CheckIncomeCategoryActiveQuery
+
     public static string CheckIncomeCategoryActiveQuery()
     {
         return @"SELECT IncomeCategoryId, IncomeCategoryName, IsActive
 FROM Income_Category WHERE IncomeCategoryId = @IncomeCategoryId AND IsActive = @IsActive";
     }
+
+    #endregion
 }
