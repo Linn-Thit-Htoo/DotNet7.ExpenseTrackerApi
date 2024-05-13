@@ -212,6 +212,7 @@ public class ExpenseController : ControllerBase
         }
         catch (Exception ex)
         {
+            transaction.Rollback();
             throw new Exception(ex.Message);
         }
     }
@@ -220,6 +221,10 @@ public class ExpenseController : ControllerBase
     [Route("/api/expense/{id}")]
     public IActionResult UpdateExpense([FromBody] UpdateExpenseRequestModel requestModel, long id)
     {
+        SqlConnection conn = new(_configuration.GetConnectionString("DbConnection"));
+        conn.Open();
+        SqlTransaction transaction = conn.BeginTransaction();
+
         try
         {
             if (requestModel.ExpenseCategoryId <= 0 || requestModel.Amount <= 0 || id == 0 || requestModel.UserId <= 0)
@@ -239,6 +244,8 @@ public class ExpenseController : ControllerBase
 
             #endregion
 
+            #region Update Expense
+
             string query = ExpenseQuery.UpdateExpenseQuery();
             List<SqlParameter> parameters = new()
             {
@@ -248,12 +255,119 @@ public class ExpenseController : ControllerBase
                 new SqlParameter("@Amount", requestModel.Amount),
                 new SqlParameter("@IsActive", requestModel.Amount)
             };
-            int result = _service.Execute(query, parameters.ToArray());
+            int result = _service.Execute(conn, transaction, query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(202, "Expense Updated!") : BadRequest("Updating Fail!");
+            #endregion
+
+            #region Get Old Balance
+
+            string getOldBalanceQuery = @"SELECT [BalanceId]
+      ,[UserId]
+      ,[Amount]
+      ,[NeededAmount]
+      ,[CreateDate]
+      ,[UpdateDate]
+  FROM [dbo].[Balance] WHERE UserId = @UserId";
+            SqlParameter[] getOldBalanceParams = { new("@UserId", requestModel.UserId) };
+            DataTable oldBalanceDt = _service.QueryFirstOrDefault(getOldBalanceQuery, getOldBalanceParams);
+
+            #endregion
+
+            long oldBalance = Convert.ToInt64(oldBalanceDt.Rows[0]["Amount"]);
+            long updatedBalance = 0;
+
+            int normalUpdateBalanceResult = 0;
+            int neededAmountUpdateResult = 0;
+
+            #region Old Balance is greater or equal to the expense amount
+
+            if (oldBalance >= requestModel.Amount)
+            {
+                updatedBalance = oldBalance - requestModel.Amount;
+
+                string normalUpdateBalanceQuery = @"UPDATE Balance SET Amount = @Amount WHERE UserId = @UserId";
+                List<SqlParameter> normalUpdateBalanceParams = new()
+                {
+                    new SqlParameter("@Amount", updatedBalance),
+                    new SqlParameter("@UserId", requestModel.UserId)
+                };
+                normalUpdateBalanceResult = _service
+                   .Execute(conn, transaction, normalUpdateBalanceQuery, normalUpdateBalanceParams.ToArray());
+            }
+
+            #endregion
+
+            #region Expense amount is much larger than old balance
+
+            if (requestModel.Amount > oldBalance)
+            {
+                long oldNeededAmount = 0;
+                long newNeededAmount = 0;
+
+                if (oldBalance == 0)
+                {
+                    #region Get Old Needed Amount
+
+                    string getOldNeededAmountQuery = @"SELECT NeededAmount FROM Balance WHERE UserId = @UserId";
+                    SqlParameter[] getOldNeededAmountParams = { new("@UserId", requestModel.UserId) };
+                    DataTable oldNeededAmountDt = _service.QueryFirstOrDefault(getOldNeededAmountQuery, getOldNeededAmountParams);
+
+                    #endregion
+
+                    oldNeededAmount = Convert.ToInt64(oldNeededAmountDt.Rows[0]["NeededAmount"]);
+                }
+
+                string oldExpenseAmountQuery = @"SELECT Amount From Expense WHERE UserId = @UserId";
+                SqlParameter[] oldExpenseAmountParams = { new("@UserId", requestModel.UserId) };
+                DataTable oldExpenseDt = _service.QueryFirstOrDefault(oldExpenseAmountQuery, oldExpenseAmountParams);
+                long oldExpenseAmount = Convert.ToInt64(oldExpenseDt.Rows[0]["Amount"]);
+
+                long newExpenseAmount = 0;
+                if (requestModel.Amount > oldExpenseAmount)
+                {
+                    newExpenseAmount = requestModel.Amount - oldExpenseAmount;
+                }
+                else
+                {
+                    newExpenseAmount = oldExpenseAmount - requestModel.Amount;
+                }
+
+                if (oldNeededAmount != 0)
+                {
+                    newNeededAmount = requestModel.Amount + oldNeededAmount + newExpenseAmount;
+                }
+
+                #region Update New Needed Amount
+
+                string neededAmountUpdateQuery = @"UPDATE Balance SET Amount = @Amount, NeededAmount = @NeededAmount WHERE UserId = @UserId";
+                List<SqlParameter> neededAmountUpdateParams = new()
+                {
+                    new SqlParameter("@Amount", updatedBalance),
+                    new SqlParameter("@NeededAmount", newNeededAmount),
+                    new SqlParameter("@UserId", requestModel.UserId)
+                };
+                neededAmountUpdateResult = _service
+                    .Execute(conn, transaction, neededAmountUpdateQuery, neededAmountUpdateParams.ToArray());
+
+                #endregion
+            }
+
+            #endregion
+
+            if ((normalUpdateBalanceResult > 0 || neededAmountUpdateResult > 0) && result > 0)
+            {
+                transaction.Commit();
+                return StatusCode(201, "Expense Updated!");
+            }
+
+            transaction.Rollback();
+            conn.Close();
+
+            return BadRequest("Updating Fail!");
         }
         catch (Exception ex)
         {
+            transaction.Rollback();
             throw new Exception(ex.Message);
         }
     }
