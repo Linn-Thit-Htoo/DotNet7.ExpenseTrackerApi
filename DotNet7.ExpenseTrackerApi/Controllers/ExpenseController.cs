@@ -5,16 +5,19 @@ using DotNet7.ExpenseTrackerApi.Queries;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 
 public class ExpenseController : ControllerBase
 {
     private readonly AdoDotNetService _service;
+    private readonly IConfiguration _configuration;
 
-    public ExpenseController(AdoDotNetService service)
+    public ExpenseController(AdoDotNetService service, IConfiguration configuration)
     {
         _service = service;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -65,8 +68,14 @@ public class ExpenseController : ControllerBase
     [Route("/api/expense")]
     public IActionResult CreateExpense([FromBody] ExpenseRequestModel requestModel)
     {
+        SqlConnection conn = new(_configuration.GetConnectionString("DbConnection"));
+        conn.Open();
+        SqlTransaction transaction = conn.BeginTransaction();
+
         try
         {
+            #region Validation
+
             if (requestModel.ExpenseCategoryId <= 0)
                 return BadRequest();
 
@@ -78,6 +87,8 @@ public class ExpenseController : ControllerBase
 
             if (string.IsNullOrEmpty(requestModel.CreateDate))
                 return BadRequest();
+
+            #endregion
 
             #region Check Expense Category is valid
 
@@ -93,6 +104,8 @@ public class ExpenseController : ControllerBase
 
             #endregion
 
+            #region Create Expense
+
             string query = ExpenseQuery.CreateExpenseQuery();
             List<SqlParameter> parameters = new()
             {
@@ -102,9 +115,100 @@ public class ExpenseController : ControllerBase
                 new SqlParameter("@CreateDate", requestModel.CreateDate),
                 new SqlParameter("@IsActive", true),
             };
-            int result = _service.Execute(query, parameters.ToArray());
+            int result = _service.Execute(conn, transaction, query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(201, "Expense Created!") : BadRequest("Creating Fail!");
+            #endregion
+
+            #region Get Old Balance
+
+            string getOldBalanceQuery = @"SELECT [BalanceId]
+      ,[UserId]
+      ,[Amount]
+      ,[NeededAmount]
+      ,[CreateDate]
+      ,[UpdateDate]
+  FROM [dbo].[Balance] WHERE UserId = @UserId";
+            SqlParameter[] getOldBalanceParams = { new("@UserId", requestModel.UserId) };
+            DataTable oldBalanceDt = _service.QueryFirstOrDefault(getOldBalanceQuery, getOldBalanceParams);
+
+            #endregion
+
+            long oldBalance = Convert.ToInt64(oldBalanceDt.Rows[0]["Amount"]);
+            long updatedBalance = 0;
+
+            int normalUpdateBalanceResult = 0;
+            int neededAmountUpdateResult = 0;
+
+            #region Old Balance is greater or equal to the expense amount
+
+            if (oldBalance >= requestModel.Amount)
+            {
+                updatedBalance = oldBalance - requestModel.Amount;
+
+                string normalUpdateBalanceQuery = @"UPDATE Balance SET Amount = @Amount WHERE UserId = @UserId";
+                List<SqlParameter> normalUpdateBalanceParams = new()
+                {
+                    new SqlParameter("@Amount", updatedBalance),
+                    new SqlParameter("@UserId", requestModel.UserId)
+                };
+                normalUpdateBalanceResult = _service
+                   .Execute(conn, transaction, normalUpdateBalanceQuery, normalUpdateBalanceParams.ToArray());
+            }
+
+            #endregion
+
+            #region Expense amount is much larger than old balance
+
+            if (requestModel.Amount > oldBalance)
+            {
+                long oldNeededAmount = 0;
+                long newNeededAmount = 0;
+
+                if (oldBalance == 0)
+                {
+                    #region Get Old Needed Amount
+
+                    string getOldNeededAmountQuery = @"SELECT NeededAmount FROM Balance WHERE UserId = @UserId";
+                    SqlParameter[] getOldNeededAmountParams = { new("@UserId", requestModel.UserId) };
+                    DataTable oldNeededAmountDt = _service.QueryFirstOrDefault(getOldNeededAmountQuery, getOldNeededAmountParams);
+
+                    #endregion
+
+                    oldNeededAmount = Convert.ToInt64(oldNeededAmountDt.Rows[0]["NeededAmount"]);
+                }
+
+                if (oldNeededAmount != 0)
+                {
+                    newNeededAmount = requestModel.Amount + oldNeededAmount;
+                }
+
+                #region Update New Needed Amount
+
+                string neededAmountUpdateQuery = @"UPDATE Balance SET Amount = @Amount, NeededAmount = @NeededAmount WHERE UserId = @UserId";
+                List<SqlParameter> neededAmountUpdateParams = new()
+                {
+                    new SqlParameter("@Amount", updatedBalance),
+                    new SqlParameter("@NeededAmount", newNeededAmount),
+                    new SqlParameter("@UserId", requestModel.UserId)
+                };
+                neededAmountUpdateResult = _service
+                    .Execute(conn, transaction, neededAmountUpdateQuery, neededAmountUpdateParams.ToArray());
+
+                #endregion
+            }
+
+            #endregion
+
+            if ((normalUpdateBalanceResult > 0 || neededAmountUpdateResult > 0) && result > 0)
+            {
+                transaction.Commit();
+                return StatusCode(201, "Expense Created!");
+            }
+
+            transaction.Rollback();
+            conn.Close();
+
+            return BadRequest("Creating Fail!");
         }
         catch (Exception ex)
         {
