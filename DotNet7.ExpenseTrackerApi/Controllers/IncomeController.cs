@@ -11,10 +11,12 @@ namespace DotNet7.ExpenseTrackerApi.Controllers;
 public class IncomeController : ControllerBase
 {
     private readonly AdoDotNetService _adoDotNetService;
+    private readonly IConfiguration _configuration;
 
-    public IncomeController(AdoDotNetService adoDotNetService)
+    public IncomeController(AdoDotNetService adoDotNetService, IConfiguration configuration)
     {
         _adoDotNetService = adoDotNetService;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -67,6 +69,10 @@ public class IncomeController : ControllerBase
     [Route("/api/income")]
     public IActionResult CreateIncome([FromBody] IncomeRequestModel requestModel)
     {
+        SqlConnection conn = new(_configuration.GetConnectionString("DbConnection"));
+        conn.Open();
+        SqlTransaction transaction = conn.BeginTransaction();
+
         try
         {
             if (requestModel.IncomeCategoryId <= 0)
@@ -95,6 +101,8 @@ public class IncomeController : ControllerBase
 
             #endregion
 
+            #region Income Create
+
             string query = IncomeQuery.CreateIncomeQuery();
             List<SqlParameter> parameters = new()
             {
@@ -104,9 +112,52 @@ public class IncomeController : ControllerBase
                 new SqlParameter("@CreateDate", requestModel.CreateDate),
                 new SqlParameter("@IsActive", true)
             };
-            int result = _adoDotNetService.Execute(query, parameters.ToArray());
+            int result = _adoDotNetService.Execute(conn, transaction, query, parameters.ToArray());
 
-            return result > 0 ? StatusCode(201, "Income Created!") : BadRequest("Creating Fail!");
+            #endregion
+
+            #region Get Old Money
+
+            // already has money + income money
+            string getOldMoneyQuery = @"SELECT [BalanceId]
+      ,[UserId]
+      ,[Amount]
+      ,[CreateDate]
+      ,[UpdateDate]
+  FROM [dbo].[Balance] WHERE UserId = @UserId";
+            List<SqlParameter> getOldMoneyParams = new()
+            {
+                new SqlParameter("@UserId", requestModel.UserId)
+            };
+            DataTable oldMoneyDt = _adoDotNetService.QueryFirstOrDefault(getOldMoneyQuery, getOldMoneyParams.ToArray());
+            long oldMoney = Convert.ToInt64(oldMoneyDt.Rows[0]["Amount"]);
+
+            #endregion
+
+            long updatedMoney = oldMoney + requestModel.Amount;
+
+            #region Update Balance
+
+            string updateBalanceAmountQuery = @"UPDATE Balance SET Amount = @Amount WHERE UserId = @UserId";
+            List<SqlParameter> updateBalanceAmountParams = new()
+            {
+                new SqlParameter("@Amount", updatedMoney),
+                new SqlParameter("@UserId", requestModel.UserId)
+            };
+            int updateBalanceResult = _adoDotNetService.Execute(conn, transaction, updateBalanceAmountQuery, updateBalanceAmountParams.ToArray());
+
+            #endregion
+
+            if (result > 0 && updateBalanceResult > 0)
+            {
+                transaction.Commit();
+                return StatusCode(201, "Income Created!");
+            }
+
+            transaction.Rollback();
+            conn.Close();
+
+            return BadRequest("Creating Fail!");
         }
         catch (Exception ex)
         {

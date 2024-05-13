@@ -32,6 +32,24 @@ public class AdoDotNetService
     }
     #endregion
 
+    #region Query With Transaction
+
+    public List<T> Query<T>(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
+    {
+        SqlCommand cmd = new(query, conn, transaction);
+        cmd.Parameters.AddRange(parameters);
+        DataTable dt = new();
+        SqlDataAdapter adapter = new(cmd);
+        adapter.Fill(dt);
+
+        string jsonStr = JsonConvert.SerializeObject(dt);
+        List<T> lst = JsonConvert.DeserializeObject<List<T>>(jsonStr)!;
+
+        return lst;
+    }
+
+    #endregion
+
     #region Query First Or Default
     public DataTable QueryFirstOrDefault(string query, SqlParameter[]? parameters = null)
     {
@@ -59,5 +77,18 @@ public class AdoDotNetService
 
         return result;
     }
+    #endregion
+
+    #region Execute With Transaction
+
+    public int Execute(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
+    {
+        SqlCommand cmd = new(query, conn, transaction);
+        cmd.Parameters.AddRange(parameters);
+        int result = cmd.ExecuteNonQuery();
+
+        return result;
+    }
+
     #endregion
 }
