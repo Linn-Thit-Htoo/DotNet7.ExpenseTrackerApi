@@ -4,6 +4,7 @@ using DotNet7.ExpenseTrackerApi.Services;
 using DotNet7.ExpenseTrackerApi.Queries;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
+using System.Data;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 
@@ -78,6 +79,20 @@ public class ExpenseController : ControllerBase
             if (string.IsNullOrEmpty(requestModel.CreateDate))
                 return BadRequest();
 
+            #region Check Expense Category is valid
+
+            string checkExpenseCategoryActiveQuery = ExpenseCategoryQuery.GetCheckExpenseCategoryActiveQuery();
+            List<SqlParameter> checkExpenseCategoryActiveParams = new()
+            {
+                new SqlParameter("@ExpenseCategoryId", requestModel.ExpenseCategoryId),
+                new SqlParameter("@IsActive", true)
+            };
+            DataTable expenseCategory = _service.QueryFirstOrDefault(checkExpenseCategoryActiveQuery, checkExpenseCategoryActiveParams.ToArray());
+            if (expenseCategory.Rows.Count <= 0)
+                return NotFound("Expense Category Not Found or Inactive");
+
+            #endregion
+
             string query = ExpenseQuery.CreateExpenseQuery();
             List<SqlParameter> parameters = new()
             {
@@ -105,6 +120,20 @@ public class ExpenseController : ControllerBase
         {
             if (requestModel.ExpenseCategoryId <= 0 || requestModel.Amount <= 0 || id == 0 || requestModel.UserId <= 0)
                 return BadRequest();
+
+            #region Check Expense Category is valid
+
+            string checkExpenseCategoryActiveQuery = ExpenseCategoryQuery.GetCheckExpenseCategoryActiveQuery();
+            List<SqlParameter> checkExpenseCategoryActiveParams = new()
+            {
+                new SqlParameter("@ExpenseCategoryId", requestModel.ExpenseCategoryId),
+                new SqlParameter("@IsActive", true)
+            };
+            DataTable expenseCategory = _service.QueryFirstOrDefault(checkExpenseCategoryActiveQuery, checkExpenseCategoryActiveParams.ToArray());
+            if (expenseCategory.Rows.Count <= 0)
+                return NotFound("Expense Category Not Found or Inactive");
+
+            #endregion
 
             string query = ExpenseQuery.UpdateExpenseQuery();
             List<SqlParameter> parameters = new()

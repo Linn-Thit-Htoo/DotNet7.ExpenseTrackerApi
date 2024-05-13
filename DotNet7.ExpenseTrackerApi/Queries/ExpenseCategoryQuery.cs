@@ -80,4 +80,12 @@ ExpenseCategoryId = @ExpenseCategoryId";
     }
 
     #endregion
+
+    public static string GetCheckExpenseCategoryActiveQuery()
+    {
+        return @"SELECT [ExpenseCategoryId]
+      ,[ExpenseCategoryName]
+      ,[IsActive]
+  FROM [dbo].[Expense_Category] WHERE ExpenseCategoryId = @ExpenseCategoryId AND IsActive = @IsActive";
+    }
 }
