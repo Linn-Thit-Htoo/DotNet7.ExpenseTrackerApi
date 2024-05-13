@@ -65,6 +65,18 @@ public class AdoDotNetService
     }
     #endregion
 
+    #region Query First Or Default
+    public DataTable QueryFirstOrDefault(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
+    {
+        SqlCommand cmd = new(query, conn, transaction);
+        cmd.Parameters.AddRange(parameters);
+        DataTable dt = new();
+        SqlDataAdapter adapter = new(cmd);
+        adapter.Fill(dt);
+        return dt;
+    }
+    #endregion
+
     #region Execute
     public int Execute(string query, SqlParameter[]? parameters = null)
     {
