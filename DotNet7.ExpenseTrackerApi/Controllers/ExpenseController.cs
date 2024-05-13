@@ -114,7 +114,7 @@ public class ExpenseController : ControllerBase
 
     [HttpPut]
     [Route("/api/expense/{id}")]
-    public IActionResult UpdateExpense([FromBody] ExpenseRequestModel requestModel, long id)
+    public IActionResult UpdateExpense([FromBody] UpdateExpenseRequestModel requestModel, long id)
     {
         try
         {

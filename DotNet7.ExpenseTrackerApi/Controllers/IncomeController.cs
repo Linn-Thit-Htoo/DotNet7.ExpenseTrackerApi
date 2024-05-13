@@ -116,7 +116,7 @@ public class IncomeController : ControllerBase
 
     [HttpPut]
     [Route("/api/income/{id}")]
-    public IActionResult UpdateIncome([FromBody] IncomeRequestModel requestModel, long id)
+    public IActionResult UpdateIncome([FromBody] UpdateIncomeRequestModel requestModel, long id)
     {
         try
         {
