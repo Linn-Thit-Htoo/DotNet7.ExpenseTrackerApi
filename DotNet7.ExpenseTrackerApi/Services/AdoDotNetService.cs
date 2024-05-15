@@ -65,7 +65,7 @@ public class AdoDotNetService
     }
     #endregion
 
-    #region Query First Or Default
+    #region Query First Or Default With Transaction
     public DataTable QueryFirstOrDefault(SqlConnection conn, SqlTransaction transaction, string query, SqlParameter[]? parameters = null)
     {
         SqlCommand cmd = new(query, conn, transaction);
