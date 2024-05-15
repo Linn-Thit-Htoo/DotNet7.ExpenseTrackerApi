@@ -24,6 +24,7 @@ public class AuthorizationMiddleware
         if (requestPath == "/api/account/register" || requestPath == "/api/account/login")
         {
             await _next(context);
+            return;
         }
 
         if (!string.IsNullOrEmpty(authHeader) && authHeader is not null && authHeader.StartsWith("Bearer"))
@@ -47,6 +48,7 @@ public class AuthorizationMiddleware
             if (principal is not null)
             {
                 await _next(context);
+                return;
             }
             else
             {
