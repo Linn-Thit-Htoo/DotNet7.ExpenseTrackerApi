@@ -286,6 +286,7 @@ public class ExpenseController : ControllerBase
         catch (Exception ex)
         {
             throw new Exception(ex.Message);
+            await transaction.RollbackAsync();
         }
     }
 }
