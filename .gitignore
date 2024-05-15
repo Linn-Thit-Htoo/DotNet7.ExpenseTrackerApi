@@ -11,6 +11,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+**/appsettings.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -363,6 +364,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-
-# Config files
-appsettings.Development.json
+/DotNet7.ExpenseTrackerApi/appsettings.json
