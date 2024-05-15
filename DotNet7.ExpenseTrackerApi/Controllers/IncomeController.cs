@@ -4,12 +4,8 @@ using DotNet7.ExpenseTrackerApi.Services;
 using DotNet7.ExpenseTrackerApi.Models.RequestModels.Income;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
-using System.Data;
-using System.Transactions;
-using System.Diagnostics.Eventing.Reader;
 using Microsoft.EntityFrameworkCore;
 using DotNet7.ExpenseTrackerApi.Models.Entities;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 
@@ -79,11 +75,35 @@ public class IncomeController : ControllerBase
         var transaction = _appDbContext.Database.BeginTransaction();
         try
         {
+            #region Check Balance according to the User ID
+
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
             if (balance is null)
-                return NotFound();
+                return NotFound("Balance not found.");
+
+            #endregion
+
+            #region Check Income Category Valid
+
+            var incomeCategory = await _appDbContext.IncomeCategory
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
+            if (incomeCategory is null)
+                return NotFound("Income Category Not Found or Inactive.");
+
+            #endregion
+
+            #region Check User Valid
+
+            var user = await _appDbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
+            if (user is null)
+                return NotFound("User Not Found or Inactive");
+
+            #endregion
 
             long updatedBalance = balance.Amount + requestModel.Amount;
 
@@ -105,7 +125,7 @@ public class IncomeController : ControllerBase
             if (balanceResult > 0 && incomeResult > 0)
             {
                 transaction.Commit();
-                return StatusCode(201, "Creating Successful");
+                return StatusCode(201, "Creating Successful.");
             }
 
             transaction.Rollback();
@@ -128,34 +148,69 @@ public class IncomeController : ControllerBase
             var item = await _appDbContext.Income
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
-
             if (item is null)
-                return NotFound();
+                return NotFound("Income Not Found.");
 
-            item.IncomeCategoryId = requestModel.IncomeCategoryId;
-            _appDbContext.Entry(item).State = EntityState.Modified;
-            int incomeUpdateResult = await _appDbContext.SaveChangesAsync();
+            var incomeCategory = await _appDbContext.IncomeCategory
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
+            if (incomeCategory is null)
+                return NotFound("Income Category Not Found or Inactive.");
+
+            #region Check User Valid
+
+            var user = await _appDbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId && x.IsActive);
+            if (user is null)
+                return NotFound("User Not Found or Inactive");
+
+            #endregion
+
+            #region Check Balance
 
             var balance = await _appDbContext.Balance
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
-
             if (balance is null)
-                return NotFound();
+                return NotFound("Balance Not Found.");
 
-            long updatedBalance = balance.Amount + requestModel.Amount;
-            balance.Amount = updatedBalance;
-            _appDbContext.Entry(balance).State = EntityState.Modified;
-            int balanceUpdateResult = await _appDbContext.SaveChangesAsync();
+            #endregion
 
-            if (incomeUpdateResult > 0 && balanceUpdateResult > 0)
+            long oldBalance = balance.Amount; // 20000
+            long oldIncome = item.Amount; // 10000
+            long newIncome = requestModel.Amount; // 5000
+            long incomeDifference = 0;
+
+            long newBalance = 0;
+
+            if (newIncome > oldIncome)
             {
-                transaction.Commit();
-                return StatusCode(202, "Updating Successful");
+                incomeDifference = newIncome - oldIncome;
+                newBalance = oldBalance + incomeDifference;
+            }
+            else
+            {
+                incomeDifference = oldIncome - newIncome; // 10000 - 5000 = 5000
+                newBalance = oldBalance - incomeDifference; // 20000 - 5000 = 15000
             }
 
-            transaction.Rollback();
-            return BadRequest("Creating Fail.");
+            balance.Amount = newBalance;
+            _appDbContext.Entry(balance).State = EntityState.Modified;
+            int balanceResult = await _appDbContext.SaveChangesAsync();
+
+            item.Amount = newIncome;
+            _appDbContext.Entry(item).State = EntityState.Modified;
+            int result = await _appDbContext.SaveChangesAsync();
+
+            if (balanceResult > 0 && result > 0)
+            {
+                await transaction.CommitAsync();
+                return StatusCode(202, "Income Updated.");
+            }
+
+            await transaction.RollbackAsync();
+            return BadRequest("Updating Fail.");
         }
         catch (Exception ex)
         {

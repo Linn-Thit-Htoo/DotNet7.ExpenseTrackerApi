@@ -9,7 +9,11 @@ namespace DotNet7.ExpenseTrackerApi
         {
         }
 
-        public DbSet<IncomeModel> Income {  get; set; }
+        public DbSet<IncomeModel> Income { get; set; }
+        public DbSet<IncomeCategoryModel> IncomeCategory { get; set; }
+        public DbSet<ExpenseModel> Expense { get; set; }
+        public DbSet<ExpenseCategoryModel> Expense_Category { get; set; }
         public DbSet<BalanceModel> Balance { get; set; }
+        public DbSet<UserModel> Users { get; set; }
     }
 }
