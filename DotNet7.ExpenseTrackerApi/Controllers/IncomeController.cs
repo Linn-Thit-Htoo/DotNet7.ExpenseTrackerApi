@@ -23,27 +23,6 @@ public class IncomeController : ControllerBase
     }
 
     [HttpGet]
-    [Route("/api/income")]
-    public IActionResult GetList()
-    {
-        try
-        {
-            string query = IncomeQuery.GetIncomeListQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@IsActive", true)
-            };
-            List<IncomeResponseModel> lst = _adoDotNetService.Query<IncomeResponseModel>(query, parameters.ToArray());
-
-            return Ok(lst);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
-
-    [HttpGet]
     [Route("/api/income/{userID}")]
     public IActionResult GetIncomeListByUserId(long userID)
     {
@@ -72,7 +51,7 @@ public class IncomeController : ControllerBase
     [Route("/api/income")]
     public async Task<IActionResult> CreateIncome([FromBody] IncomeRequestModel requestModel)
     {
-        var transaction = _appDbContext.Database.BeginTransaction();
+        var transaction = await _appDbContext.Database.BeginTransactionAsync();
         try
         {
             #region Check Balance according to the User ID
@@ -107,9 +86,15 @@ public class IncomeController : ControllerBase
 
             long updatedBalance = balance.Amount + requestModel.Amount;
 
+            #region Balance Update
+
             balance.Amount = updatedBalance;
             _appDbContext.Entry(balance).State = EntityState.Modified;
             int balanceResult = await _appDbContext.SaveChangesAsync();
+
+            #endregion
+
+            #region Create Income
 
             IncomeModel model = new()
             {
@@ -122,18 +107,20 @@ public class IncomeController : ControllerBase
             await _appDbContext.Income.AddAsync(model);
             int incomeResult = await _appDbContext.SaveChangesAsync();
 
+            #endregion
+
             if (balanceResult > 0 && incomeResult > 0)
             {
-                transaction.Commit();
+                await transaction.CommitAsync();
                 return StatusCode(201, "Creating Successful.");
             }
 
-            transaction.Rollback();
+            await transaction.RollbackAsync();
             return BadRequest("Creating Fail.");
         }
         catch (Exception ex)
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync();
             throw new Exception(ex.Message);
         }
     }
@@ -142,20 +129,28 @@ public class IncomeController : ControllerBase
     [Route("/api/income/{id}")]
     public async Task<IActionResult> UpdateIncome([FromBody] UpdateIncomeRequestModel requestModel, long id)
     {
-        var transaction = _appDbContext.Database.BeginTransaction();
+        var transaction = await _appDbContext.Database.BeginTransactionAsync();
         try
         {
+            #region Check Income
+
             var item = await _appDbContext.Income
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
             if (item is null)
                 return NotFound("Income Not Found.");
 
+            #endregion
+
+            #region Check Income Category
+
             var incomeCategory = await _appDbContext.IncomeCategory
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.IncomeCategoryId == requestModel.IncomeCategoryId && x.IsActive);
             if (incomeCategory is null)
                 return NotFound("Income Category Not Found or Inactive.");
+
+            #endregion
 
             #region Check User Valid
 
@@ -195,13 +190,21 @@ public class IncomeController : ControllerBase
                 newBalance = oldBalance - incomeDifference; // 20000 - 5000 = 15000
             }
 
+            #region Update Balance
+
             balance.Amount = newBalance;
             _appDbContext.Entry(balance).State = EntityState.Modified;
             int balanceResult = await _appDbContext.SaveChangesAsync();
 
+            #endregion
+
+            #region Update Income
+
             item.Amount = newIncome;
             _appDbContext.Entry(item).State = EntityState.Modified;
             int result = await _appDbContext.SaveChangesAsync();
+
+            #endregion
 
             if (balanceResult > 0 && result > 0)
             {
@@ -214,32 +217,75 @@ public class IncomeController : ControllerBase
         }
         catch (Exception ex)
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync();
             throw new Exception(ex.Message);
         }
     }
 
     [HttpDelete]
     [Route("/api/income/{id}")]
-    public IActionResult DeleteIncome(long id)
+    public async Task<IActionResult> DeleteIncome(long id)
     {
+        var transaction = await _appDbContext.Database.BeginTransactionAsync();
         try
         {
             if (id <= 0)
                 return BadRequest("Id cannot be empty.");
 
-            string query = IncomeQuery.DeleteIncomeQuery();
-            List<SqlParameter> parameters = new()
-            {
-                new SqlParameter("@IsActive", false),
-                new SqlParameter("@IncomeId", id)
-            };
-            int result = _adoDotNetService.Execute(query, parameters.ToArray());
+            #region Check Income
 
-            return result > 0 ? StatusCode(202, "Income Deleted!") : BadRequest("Deleting Fail!");
+            var income = await _appDbContext.Income
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IncomeId == id && x.IsActive);
+            if (income is null)
+                return NotFound("Income Not Found.");
+
+            #endregion
+
+            long userID = income.UserId;
+
+            #region Check Balance
+
+            var balance = await _appDbContext.Balance
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == userID);
+            if (balance is null)
+                return NotFound("Balance Not Found.");
+
+            #endregion
+
+            long balanceAmount = balance.Amount;
+            long updatedBalance = balanceAmount - income.Amount;
+
+            #region Balance Update
+
+            balance.Amount = updatedBalance;
+            _appDbContext.Entry(balance).State = EntityState.Modified;
+            int balanceResult = await _appDbContext.SaveChangesAsync();
+
+            #endregion
+
+
+            #region Delete Income
+
+            income.IsActive = false;
+            _appDbContext.Entry(income).State = EntityState.Modified;
+            int result = await _appDbContext.SaveChangesAsync();
+
+            #endregion
+
+            if (balanceResult > 0 && result > 0)
+            {
+                await transaction.CommitAsync();
+                return StatusCode(202, "Income Deleted.");
+            }
+
+            await transaction.RollbackAsync();
+            return StatusCode(202, "Deleting Fail.");
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
             throw new Exception(ex.Message);
         }
     }
