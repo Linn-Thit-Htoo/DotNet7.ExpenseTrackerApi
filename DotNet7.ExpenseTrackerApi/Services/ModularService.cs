@@ -1,0 +1,39 @@
+﻿using DotNet7.ExpenseTrackerApi.Middleware;
+using Microsoft.EntityFrameworkCore;
+
+namespace DotNet7.ExpenseTrackerApi.Services;
+
+public static class ModularService
+{
+    public static IServiceCollection AddServices(this IServiceCollection services, WebApplicationBuilder builder)
+    {
+        services.AddCustomServices();
+        services.AddDbContextService(builder);
+        return services;
+    }
+
+    public static IApplicationBuilder AddAuthorizationMiddleware(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<AuthorizationMiddleware>();
+        return app;
+    }
+
+    public static IServiceCollection AddCustomServices(this IServiceCollection services)
+    {
+        services.AddScoped<AdoDotNetService>();
+        services.AddSingleton<AesService>();
+        services.AddScoped<JwtService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddDbContextService(this IServiceCollection services, WebApplicationBuilder builder)
+    {
+        services.AddDbContext<AppDbContext>(opt =>
+        {
+            opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+        });
+
+        return services;
+    }
+}

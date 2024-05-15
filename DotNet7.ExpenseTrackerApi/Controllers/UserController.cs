@@ -1,11 +1,16 @@
 ﻿using DotNet7.ExpenseTrackerApi.Enums;
+using DotNet7.ExpenseTrackerApi.Models.Entities;
 using DotNet7.ExpenseTrackerApi.Models.RequestModels.User;
 using DotNet7.ExpenseTrackerApi.Models.ResponseModels.User;
 using DotNet7.ExpenseTrackerApi.Queries;
 using DotNet7.ExpenseTrackerApi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.Data;
 using System.Data.SqlClient;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 
@@ -13,11 +18,13 @@ public class UserController : ControllerBase
 {
     private readonly AdoDotNetService _adoDotNetService;
     private readonly IConfiguration _configuration;
+    private readonly JwtService _jwtService;
 
-    public UserController(AdoDotNetService service, IConfiguration configuration)
+    public UserController(AdoDotNetService service, IConfiguration configuration, JwtService jwtService)
     {
         _adoDotNetService = service;
         _configuration = configuration;
+        _jwtService = jwtService;
     }
 
     [HttpPost]
@@ -135,20 +142,14 @@ public class UserController : ControllerBase
                 new SqlParameter("@Password", requestModel.Password),
                 new SqlParameter("@IsActive", true),
             };
-            DataTable user = _adoDotNetService.QueryFirstOrDefault(query, parameters.ToArray());
-            if (user.Rows.Count == 0)
+
+            List<UserModel> lst = _adoDotNetService.Query<UserModel>(query, parameters.ToArray());
+            if (lst is null)
                 return NotFound("User not found. Login Fail.");
 
-            LoginResponseModel responseModel = new()
-            {
-                UserId = Convert.ToInt64(user.Rows[0]["UserId"]),
-                UserName = Convert.ToString(user.Rows[0]["UserName"])!,
-                Email = Convert.ToString(user.Rows[0]["Email"])!,
-                Gender = Convert.ToString(user.Rows[0]["Gender"])!,
-                DOB = Convert.ToString(user.Rows[0]["DOB"])!,
-            };
+            UserModel userDataModel = lst[0];
 
-            return StatusCode(202, responseModel);
+            return StatusCode(202, new { access_token = _jwtService.GenerateJWTToken(userDataModel) });
         }
         catch (Exception ex)
         {
