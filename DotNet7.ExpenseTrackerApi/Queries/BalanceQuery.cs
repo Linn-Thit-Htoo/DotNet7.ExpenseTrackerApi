@@ -2,6 +2,16 @@
 
 public static class BalanceQuery
 {
+    public static string GetBalanceByUserId()
+    {
+        return @"SELECT [BalanceId]
+      ,[UserId]
+      ,[Amount]
+      ,[CreateDate]
+      ,[UpdateDate]
+  FROM [dbo].[Balance] WHERE UserId = @UserId";
+    }
+
     #region CreateBalanceQuery
 
     public static string CreateBalanceQuery()

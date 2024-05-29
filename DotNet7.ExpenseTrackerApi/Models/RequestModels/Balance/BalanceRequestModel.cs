@@ -3,5 +3,5 @@
 public class BalanceRequestModel
 {
     public long UserId { get; set; }
-    public long Amount { get; set; }
+    public decimal Amount { get; set; }
 }

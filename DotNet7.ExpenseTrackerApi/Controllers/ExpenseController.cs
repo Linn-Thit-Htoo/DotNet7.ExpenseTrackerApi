@@ -84,8 +84,8 @@ public class ExpenseController : ControllerBase
 
             #endregion
 
-            long oldBalance = balance.Amount;
-            long newBalance = oldBalance - requestModel.Amount;
+            decimal oldBalance = balance.Amount;
+            decimal newBalance = oldBalance - requestModel.Amount;
 
             #region Balance Update
 
@@ -174,8 +174,8 @@ public class ExpenseController : ControllerBase
 
             #endregion
 
-            long oldBalance = balance.Amount; // 1000
-            long newBalance = 0;
+            decimal oldBalance = balance.Amount; // 1000
+            decimal newBalance = 0;
             long oldExpense = expense.Amount; // 6000
             long newExpense = requestModel.Amount; // 1000
             long expenseDifference = 0;
@@ -259,7 +259,7 @@ public class ExpenseController : ControllerBase
 
             #region Update Balance
 
-            long updatedBalance = balance.Amount + expense.Amount;
+            decimal updatedBalance = balance.Amount + expense.Amount;
             balance.Amount = updatedBalance;
             _appDbContext.Entry(balance).State = EntityState.Modified;
             int balanceResult = await _appDbContext.SaveChangesAsync();
@@ -285,8 +285,8 @@ public class ExpenseController : ControllerBase
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
             await transaction.RollbackAsync();
+            throw new Exception(ex.Message);
         }
     }
 }

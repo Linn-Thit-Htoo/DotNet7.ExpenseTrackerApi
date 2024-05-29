@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using DotNet7.ExpenseTrackerApi.Models.Entities;
+using Newtonsoft.Json;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 
@@ -56,11 +57,14 @@ public class IncomeController : ControllerBase
         {
             #region Check Balance according to the User ID
 
-            var balance = await _appDbContext.Balance
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.UserId == requestModel.UserId);
-            if (balance is null)
+            string query = BalanceQuery.GetBalanceByUserId();
+            SqlParameter[] parameters = { new("@UserId", requestModel.UserId) };
+            var dt = _adoDotNetService.QueryFirstOrDefault(query, parameters);
+
+            if (dt.Rows.Count == 0)
                 return NotFound("Balance not found.");
+
+            decimal balance = Convert.ToDecimal(dt.Rows[0]["Amount"]);
 
             #endregion
 
@@ -84,13 +88,18 @@ public class IncomeController : ControllerBase
 
             #endregion
 
-            long updatedBalance = balance.Amount + requestModel.Amount;
+            decimal updatedBalance = balance + requestModel.Amount;
 
             #region Balance Update
 
-            balance.Amount = updatedBalance;
-            _appDbContext.Entry(balance).State = EntityState.Modified;
-            int balanceResult = await _appDbContext.SaveChangesAsync();
+            string balanceUpdateQuery = BalanceQuery.UpdateBalanceQuery();
+            List<SqlParameter> balanceUpdateParams = new()
+            {
+                new SqlParameter("@Amount", updatedBalance),
+                new SqlParameter("@UserId", Convert.ToInt64(dt.Rows[0]["UserId"])),
+                new SqlParameter("@UpdateDate", DateTime.Now)
+            };
+            int balanceResult = _adoDotNetService.Execute(balanceUpdateQuery, balanceUpdateParams.ToArray());
 
             #endregion
 
@@ -172,12 +181,12 @@ public class IncomeController : ControllerBase
 
             #endregion
 
-            long oldBalance = balance.Amount; // 20000
+            decimal oldBalance = balance.Amount; // 20000
             long oldIncome = item.Amount; // 10000
             long newIncome = requestModel.Amount; // 5000
             long incomeDifference = 0;
 
-            long newBalance = 0;
+            decimal newBalance = 0;
 
             if (newIncome > oldIncome)
             {
@@ -254,8 +263,8 @@ public class IncomeController : ControllerBase
 
             #endregion
 
-            long balanceAmount = balance.Amount;
-            long updatedBalance = balanceAmount - income.Amount;
+            decimal balanceAmount = balance.Amount;
+            decimal updatedBalance = balanceAmount - income.Amount;
 
             #region Balance Update
 
