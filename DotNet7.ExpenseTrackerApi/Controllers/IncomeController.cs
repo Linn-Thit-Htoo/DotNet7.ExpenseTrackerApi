@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using DotNet7.ExpenseTrackerApi.Models.Entities;
-using Newtonsoft.Json;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 
