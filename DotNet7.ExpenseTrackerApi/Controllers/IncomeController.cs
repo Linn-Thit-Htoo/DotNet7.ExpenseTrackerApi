@@ -265,7 +265,6 @@ public class IncomeController : ControllerBase
 
             #endregion
 
-
             #region Delete Income
 
             income.IsActive = false;
