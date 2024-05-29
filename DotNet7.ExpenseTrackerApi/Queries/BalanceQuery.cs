@@ -2,7 +2,7 @@
 
 public static class BalanceQuery
 {
-    #region MyRegion
+    #region Get Balance By User Id
 
     #endregion
     public static string GetBalanceByUserId()
