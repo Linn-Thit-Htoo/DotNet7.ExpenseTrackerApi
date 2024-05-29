@@ -13,6 +13,7 @@ public static class BalanceQuery
       ,[UpdateDate]
   FROM [dbo].[Balance] WHERE UserId = @UserId";
     }
+
     #endregion
 
     #region CreateBalanceQuery
