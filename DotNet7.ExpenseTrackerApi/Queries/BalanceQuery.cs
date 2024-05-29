@@ -4,7 +4,6 @@ public static class BalanceQuery
 {
     #region Get Balance By User Id
 
-    #endregion
     public static string GetBalanceByUserId()
     {
         return @"SELECT [BalanceId]
@@ -14,6 +13,7 @@ public static class BalanceQuery
       ,[UpdateDate]
   FROM [dbo].[Balance] WHERE UserId = @UserId";
     }
+    #endregion
 
     #region CreateBalanceQuery
 
