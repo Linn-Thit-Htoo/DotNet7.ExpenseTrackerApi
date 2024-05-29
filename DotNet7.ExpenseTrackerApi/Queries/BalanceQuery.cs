@@ -2,6 +2,9 @@
 
 public static class BalanceQuery
 {
+    #region MyRegion
+
+    #endregion
     public static string GetBalanceByUserId()
     {
         return @"SELECT [BalanceId]
