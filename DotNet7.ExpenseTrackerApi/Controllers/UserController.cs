@@ -135,6 +135,7 @@ public class UserController : ControllerBase
         {
             if (requestModel is null || string.IsNullOrEmpty(requestModel.Email) || string.IsNullOrEmpty(requestModel.Password))
                 return BadRequest("Email or Password is empty.");
+
             string query = UserQuery.GetLoginQuery();
             List<SqlParameter> parameters = new()
             {
