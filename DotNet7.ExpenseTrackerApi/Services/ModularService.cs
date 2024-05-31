@@ -32,6 +32,7 @@ public static class ModularService
 
         return services;
     }
+
     #endregion
 
     public static IServiceCollection AddDbContextService(this IServiceCollection services, WebApplicationBuilder builder)
