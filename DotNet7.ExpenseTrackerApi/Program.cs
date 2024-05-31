@@ -36,16 +36,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddServices(builder);
 
-//builder.Services.AddScoped<AdoDotNetService>();
-
-//builder.Services.AddDbContext<AppDbContext>(opt =>
-//{
-//    opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
-//});
-
-//builder.Services.AddSingleton<AesService>();
-//builder.Services.AddScoped<JwtService>();
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
