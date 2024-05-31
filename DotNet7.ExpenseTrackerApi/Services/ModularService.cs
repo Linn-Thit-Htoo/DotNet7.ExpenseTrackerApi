@@ -14,12 +14,12 @@ public static class ModularService
 
     #region Add Authorization Middleware
 
-    #endregion
     public static IApplicationBuilder AddAuthorizationMiddleware(this IApplicationBuilder app)
     {
         app.UseMiddleware<AuthorizationMiddleware>();
         return app;
     }
+    #endregion
 
     public static IServiceCollection AddCustomServices(this IServiceCollection services)
     {
