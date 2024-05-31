@@ -24,7 +24,6 @@ public static class ModularService
 
     #region Add Custom Services
 
-    #endregion
     public static IServiceCollection AddCustomServices(this IServiceCollection services)
     {
         services.AddScoped<AdoDotNetService>();
@@ -33,6 +32,7 @@ public static class ModularService
 
         return services;
     }
+    #endregion
 
     public static IServiceCollection AddDbContextService(this IServiceCollection services, WebApplicationBuilder builder)
     {
