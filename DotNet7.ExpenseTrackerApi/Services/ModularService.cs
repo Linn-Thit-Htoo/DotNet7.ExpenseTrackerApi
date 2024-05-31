@@ -22,6 +22,9 @@ public static class ModularService
 
     #endregion
 
+    #region MyRegion
+
+    #endregion
     public static IServiceCollection AddCustomServices(this IServiceCollection services)
     {
         services.AddScoped<AdoDotNetService>();
