@@ -9,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 #region JWT Setup
 
-#endregion
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
 var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>()!;
 
@@ -27,6 +26,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
      };
  });
+#endregion
 
 
 builder.Services.AddControllers().AddJsonOptions(opt =>
