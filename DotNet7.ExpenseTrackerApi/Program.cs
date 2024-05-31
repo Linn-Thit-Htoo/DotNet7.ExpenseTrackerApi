@@ -5,61 +5,52 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using DotNet7.ExpenseTrackerApi.Services;
 
-namespace DotNet7.ExpenseTrackerApi
+var builder = WebApplication.CreateBuilder(args);
+
+var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
+var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>()!;
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+ .AddJwtBearer(options =>
+ {
+     options.TokenValidationParameters = new TokenValidationParameters
+     {
+         ValidateIssuer = true,
+         ValidateAudience = true,
+         ValidateLifetime = true,
+         ValidateIssuerSigningKey = true,
+         ValidIssuer = jwtIssuer,
+         ValidAudience = jwtIssuer,
+         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+     };
+ });
+
+
+builder.Services.AddControllers().AddJsonOptions(opt =>
 {
-    internal class Program
-    {
-        private static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+    opt.JsonSerializerOptions.PropertyNamingPolicy = null;
+});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-            var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
-            var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>()!;
+builder.Services.AddServices(builder);
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-             .AddJwtBearer(options =>
-             {
-                 options.TokenValidationParameters = new TokenValidationParameters
-                 {
-                     ValidateIssuer = true,
-                     ValidateAudience = true,
-                     ValidateLifetime = true,
-                     ValidateIssuerSigningKey = true,
-                     ValidIssuer = jwtIssuer,
-                     ValidAudience = jwtIssuer,
-                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-                 };
-             });
+var app = builder.Build();
 
-
-            builder.Services.AddControllers().AddJsonOptions(opt =>
-            {
-                opt.JsonSerializerOptions.PropertyNamingPolicy = null;
-            });
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            builder.Services.AddServices(builder);
-
-            var app = builder.Build();
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseAuthentication();
-
-            app.UseAuthorization();
-
-            //app.AddAuthorizationMiddleware();
-
-            app.MapControllers();
-
-            app.Run();
-        }
-    }
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
+//app.AddAuthorizationMiddleware();
+
+app.MapControllers();
+
+app.Run();
