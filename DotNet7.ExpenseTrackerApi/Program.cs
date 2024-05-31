@@ -7,6 +7,9 @@ using DotNet7.ExpenseTrackerApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region MyRegion
+
+#endregion
 var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
 var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>()!;
 
