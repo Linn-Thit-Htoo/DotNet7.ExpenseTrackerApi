@@ -19,6 +19,7 @@ public static class ModularService
         app.UseMiddleware<AuthorizationMiddleware>();
         return app;
     }
+
     #endregion
 
     public static IServiceCollection AddCustomServices(this IServiceCollection services)
