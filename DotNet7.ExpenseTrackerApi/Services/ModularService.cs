@@ -22,7 +22,7 @@ public static class ModularService
 
     #endregion
 
-    #region MyRegion
+    #region Add Custom Services
 
     #endregion
     public static IServiceCollection AddCustomServices(this IServiceCollection services)
