@@ -1,0 +1,23 @@
+﻿@page "/";
+@using DotNet7.ExpenseTrackerApi.BlazorWasm.Data
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Register</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTextField TextChanged="Validate" Immediate="true" @bind-Value="requestModel.UserName" Label="Enter User Name" Variant="Variant.Text" InputType="InputType.Text"></MudTextField>
+        <MudTextField TextChanged="Validate" Immediate="true" @bind-Value="requestModel.Email" Label="Enter Email" Variant="Variant.Text" InputType="InputType.Email"></MudTextField>
+        <MudTextField TextChanged="Validate" Immediate="true" @bind-Value="requestModel.Password" Label="Enter Password" Variant="Variant.Text" InputType="InputType.Password"></MudTextField>
+        <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="Date Of Birth" @bind-Date="requestModel.DOB" DateFormat="dd/MM/yyyy" />
+        <MudSelect TextChanged="Validate" Immediate="true" @bind-Value="requestModel.Gender" Label="Choose Gender" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var item in StaticData.Gender())
+            {
+                <MudSelectItem Value="@(item.Value)" />
+            }
+        </MudSelect>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@isBtnDisabled" Style="margin-top: 1%;">Register</MudButton>
+    </MudCardContent>
+</MudCard>
