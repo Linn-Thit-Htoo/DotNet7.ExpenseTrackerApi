@@ -1,4 +1,4 @@
-﻿namespace DotNet7.ExpenseTrackerApi.Models.ResponseModels.Expense;
+﻿namespace DotNet7.ExpenseTrackerApi.Models.Setup.Expense;
 
 public class ExpenseResponseModel
 {
