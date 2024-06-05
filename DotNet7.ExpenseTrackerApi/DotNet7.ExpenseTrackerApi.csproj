@@ -17,4 +17,9 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DotNet7.ExpenseTrackerApi.DbService\DotNet7.ExpenseTrackerApi.DbService.csproj" />
+    <ProjectReference Include="..\DotNet7.ExpenseTrackerApi.Models\DotNet7.ExpenseTrackerApi.Models.csproj" />
+  </ItemGroup>
+
 </Project>

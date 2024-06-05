@@ -1,4 +1,4 @@
-﻿namespace DotNet7.ExpenseTrackerApi.Models.ResponseModels.User;
+﻿namespace DotNet7.ExpenseTrackerApi.Models.Setup.User;
 
 public class LoginResponseModel
 {

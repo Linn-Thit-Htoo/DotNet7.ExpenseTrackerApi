@@ -1,4 +1,4 @@
-﻿using DotNet7.ExpenseTrackerApi.Models.Entities;
+﻿using DotNet7.ExpenseTrackerApi.DbService.Entities;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

@@ -1,10 +1,10 @@
-﻿using DotNet7.ExpenseTrackerApi.Models.Entities;
-using DotNet7.ExpenseTrackerApi.Models.RequestModels.IncomeCategory;
-using DotNet7.ExpenseTrackerApi.Services;
+﻿using DotNet7.ExpenseTrackerApi.Services;
 using DotNet7.ExpenseTrackerApi.Queries;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
+using DotNet7.ExpenseTrackerApi.DbService.Entities;
+using DotNet7.ExpenseTrackerApi.Models.Setup.IncomeCategory;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 

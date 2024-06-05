@@ -1,7 +1,7 @@
-﻿using DotNet7.ExpenseTrackerApi.Models.Entities;
+﻿using DotNet7.ExpenseTrackerApi.DbService.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNet7.ExpenseTrackerApi;
+namespace DotNet7.ExpenseTrackerApi.DbService;
 
 public class AppDbContext : DbContext
 {

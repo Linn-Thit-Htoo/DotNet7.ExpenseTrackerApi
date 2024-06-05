@@ -1,4 +1,4 @@
-﻿namespace DotNet7.ExpenseTrackerApi.Models.RequestModels.ExpenseCategory;
+﻿namespace DotNet7.ExpenseTrackerApi.Models.Setup.ExpenseCategory;
 
 public class ExpenseCategoryRequestModel
 {

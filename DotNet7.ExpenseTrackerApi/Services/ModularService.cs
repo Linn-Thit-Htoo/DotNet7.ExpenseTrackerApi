@@ -1,4 +1,5 @@
-﻿using DotNet7.ExpenseTrackerApi.Middleware;
+﻿using DotNet7.ExpenseTrackerApi.DbService;
+using DotNet7.ExpenseTrackerApi.Middleware;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNet7.ExpenseTrackerApi.Services;

@@ -1,5 +1,5 @@
-﻿using DotNet7.ExpenseTrackerApi.Models.Entities;
-using DotNet7.ExpenseTrackerApi.Models.RequestModels.ExpenseCategory;
+﻿using DotNet7.ExpenseTrackerApi.DbService.Entities;
+using DotNet7.ExpenseTrackerApi.Models.Setup.ExpenseCategory;
 using DotNet7.ExpenseTrackerApi.Queries;
 using DotNet7.ExpenseTrackerApi.Services;
 using Microsoft.AspNetCore.Mvc;

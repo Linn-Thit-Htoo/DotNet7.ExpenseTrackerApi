@@ -1,4 +1,4 @@
-﻿namespace DotNet7.ExpenseTrackerApi.Models.RequestModels.Income;
+﻿namespace DotNet7.ExpenseTrackerApi.Models.Setup.Income;
 
 public class IncomeRequestModel
 {

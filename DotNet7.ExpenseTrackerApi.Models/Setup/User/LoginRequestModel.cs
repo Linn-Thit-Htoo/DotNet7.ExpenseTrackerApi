@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DotNet7.ExpenseTrackerApi.Models.RequestModels.User;
+namespace DotNet7.ExpenseTrackerApi.Models.Setup.User;
 
 public class LoginRequestModel
 {

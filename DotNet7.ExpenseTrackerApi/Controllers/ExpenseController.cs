@@ -1,11 +1,11 @@
-﻿using DotNet7.ExpenseTrackerApi.Models.RequestModels.Expense;
-using DotNet7.ExpenseTrackerApi.Models.ResponseModels.Expense;
-using DotNet7.ExpenseTrackerApi.Services;
+﻿using DotNet7.ExpenseTrackerApi.Services;
 using DotNet7.ExpenseTrackerApi.Queries;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using DotNet7.ExpenseTrackerApi.Models.Entities;
+using DotNet7.ExpenseTrackerApi.Models.Setup.Expense;
+using DotNet7.ExpenseTrackerApi.DbService;
+using DotNet7.ExpenseTrackerApi.DbService.Entities;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 

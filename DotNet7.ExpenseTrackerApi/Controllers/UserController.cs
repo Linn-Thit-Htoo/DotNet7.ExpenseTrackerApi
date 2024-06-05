@@ -1,7 +1,6 @@
-﻿using DotNet7.ExpenseTrackerApi.Enums;
-using DotNet7.ExpenseTrackerApi.Models.Entities;
-using DotNet7.ExpenseTrackerApi.Models.RequestModels.User;
-using DotNet7.ExpenseTrackerApi.Models.ResponseModels.User;
+﻿using DotNet7.ExpenseTrackerApi.DbService.Entities;
+using DotNet7.ExpenseTrackerApi.Enums;
+using DotNet7.ExpenseTrackerApi.Models.Setup.User;
 using DotNet7.ExpenseTrackerApi.Queries;
 using DotNet7.ExpenseTrackerApi.Services;
 using Microsoft.AspNetCore.Mvc;

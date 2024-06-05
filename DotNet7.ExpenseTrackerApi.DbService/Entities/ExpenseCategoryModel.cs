@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DotNet7.ExpenseTrackerApi.Models.Entities;
+namespace DotNet7.ExpenseTrackerApi.DbService.Entities;
 
 [Table("Expense_Category")]
 public class ExpenseCategoryModel

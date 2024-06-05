@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DotNet7.ExpenseTrackerApi.Models.Entities;
+namespace DotNet7.ExpenseTrackerApi.DbService.Entities;
 
 public class ExpenseModel
 {
