@@ -1,6 +1,5 @@
-﻿namespace DotNet7.ExpenseTrackerApi.BlazorWasm.Pages.Authentication
+﻿namespace DotNet7.ExpenseTrackerApi.BlazorWasm.Pages.Authentication;
+
+public partial class P_Login
 {
-    public partial class P_Login
-    {
-    }
 }
