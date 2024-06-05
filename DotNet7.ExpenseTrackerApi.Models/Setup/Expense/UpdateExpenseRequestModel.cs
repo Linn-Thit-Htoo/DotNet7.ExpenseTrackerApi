@@ -1,4 +1,4 @@
-﻿namespace DotNet7.ExpenseTrackerApi.Models.RequestModels.Expense;
+﻿namespace DotNet7.ExpenseTrackerApi.Models.Setup.Expense;
 
 public class UpdateExpenseRequestModel
 {
