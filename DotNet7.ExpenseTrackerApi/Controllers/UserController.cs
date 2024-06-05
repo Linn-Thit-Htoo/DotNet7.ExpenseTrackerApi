@@ -4,12 +4,8 @@ using DotNet7.ExpenseTrackerApi.Models.Setup.User;
 using DotNet7.ExpenseTrackerApi.Queries;
 using DotNet7.ExpenseTrackerApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using System.Data;
 using System.Data.SqlClient;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 
 namespace DotNet7.ExpenseTrackerApi.Controllers;
 
@@ -44,7 +40,7 @@ public class UserController : ControllerBase
             if (string.IsNullOrEmpty(requestModel.Password))
                 return BadRequest("Password cannot be empty.");
 
-            if (string.IsNullOrEmpty(requestModel.DOB))
+            if (string.IsNullOrEmpty(requestModel.DOB)) // == default
                 return BadRequest("DOB cannot be empty.");
 
             if (string.IsNullOrEmpty(requestModel.Gender))
