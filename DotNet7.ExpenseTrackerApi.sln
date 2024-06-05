@@ -10,7 +10,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		expense-tracker-script.sql = expense-tracker-script.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet7.ExpenseTrackerApi.BlazorWasm", "DotNet7.ExpenseTrackerApi.BlazorWasm\DotNet7.ExpenseTrackerApi.BlazorWasm.csproj", "{45F10659-C42F-4ACB-8997-FBCC77EC0355}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNet7.ExpenseTrackerApi.BlazorWasm", "DotNet7.ExpenseTrackerApi.BlazorWasm\DotNet7.ExpenseTrackerApi.BlazorWasm.csproj", "{45F10659-C42F-4ACB-8997-FBCC77EC0355}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet7.ExpenseTrackerApi.Models", "DotNet7.ExpenseTrackerApi.Models\DotNet7.ExpenseTrackerApi.Models.csproj", "{E79E3214-3073-47FB-8973-A19627551E91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet7.ExpenseTrackerApi.DbService", "DotNet7.ExpenseTrackerApi.DbService\DotNet7.ExpenseTrackerApi.DbService.csproj", "{75C1BBCA-3E51-4B0B-8D98-FECF80651CB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +30,14 @@ Global
 		{45F10659-C42F-4ACB-8997-FBCC77EC0355}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45F10659-C42F-4ACB-8997-FBCC77EC0355}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45F10659-C42F-4ACB-8997-FBCC77EC0355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E79E3214-3073-47FB-8973-A19627551E91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E79E3214-3073-47FB-8973-A19627551E91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E79E3214-3073-47FB-8973-A19627551E91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E79E3214-3073-47FB-8973-A19627551E91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75C1BBCA-3E51-4B0B-8D98-FECF80651CB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75C1BBCA-3E51-4B0B-8D98-FECF80651CB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75C1BBCA-3E51-4B0B-8D98-FECF80651CB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75C1BBCA-3E51-4B0B-8D98-FECF80651CB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
