@@ -12,7 +12,7 @@ public class UserModel
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!;
     public string UserRole { get; set; } = null!;
-    public string DOB { get; set; } = null!;
+    public DateTime DOB { get; set; }
     public string Gender { get; set; } = null!;
     public bool IsActive { get; set; }
 }

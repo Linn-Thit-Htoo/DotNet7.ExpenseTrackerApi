@@ -40,14 +40,8 @@ public class UserController : ControllerBase
             if (string.IsNullOrEmpty(requestModel.Password))
                 return BadRequest("Password cannot be empty.");
 
-            //if (string.IsNullOrEmpty(requestModel.DOB)) // == default
-               // return BadRequest("DOB cannot be empty.");
-               if (requestModel.DOB.IsNullOrEmpty())
-               {
-                   requestModel.DOB = DateTime.Now;
-               }
-                return Ok(requestModel.DOB.Value);
-    
+            if (requestModel.DOB == default)
+                throw new Exception("Date Of Birth cannot be empty.");
 
             if (string.IsNullOrEmpty(requestModel.Gender))
                 return BadRequest("Gender cannot be empty.");
