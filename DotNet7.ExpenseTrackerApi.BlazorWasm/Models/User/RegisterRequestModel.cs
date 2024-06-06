@@ -10,6 +10,6 @@ public class RegisterRequestModel
     [MaxLength(12)]
     [MinLength(6)]
     public string Password { get; set; } = null!;
-    public DateTime? DOB { get; set; } == default;
+    public DateTime? DOB { get; set; }
     public string Gender { get; set; } = null!;
 }
