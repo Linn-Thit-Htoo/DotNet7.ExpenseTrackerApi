@@ -19,4 +19,8 @@
     <ProjectReference Include="..\DotNet7.ExpenseTrackerApi.Models\DotNet7.ExpenseTrackerApi.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Layouts\" />
+  </ItemGroup>
+
 </Project>
