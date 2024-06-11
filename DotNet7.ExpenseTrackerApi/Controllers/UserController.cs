@@ -3,6 +3,7 @@ using DotNet7.ExpenseTrackerApi.Enums;
 using DotNet7.ExpenseTrackerApi.Models.Setup.User;
 using DotNet7.ExpenseTrackerApi.Queries;
 using DotNet7.ExpenseTrackerApi.Services;
+using DotNet7.ExpenseTrackerApi.Shared;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;

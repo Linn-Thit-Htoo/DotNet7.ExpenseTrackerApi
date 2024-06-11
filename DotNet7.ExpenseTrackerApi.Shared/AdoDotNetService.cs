@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace DotNet7.ExpenseTrackerApi.Services;
+namespace DotNet7.ExpenseTrackerApi.Shared;
 
 public class AdoDotNetService
 {

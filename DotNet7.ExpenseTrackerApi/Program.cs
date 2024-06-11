@@ -53,7 +53,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-//app.AddAuthorizationMiddleware();
+// app.AddAuthorizationMiddleware();
 
 app.MapControllers();
 
